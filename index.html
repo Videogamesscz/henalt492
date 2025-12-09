@@ -187,7 +187,8 @@
                 btnHen.style.color = "red";
                 btnHen.style.background = "rgba(50, 0, 0, 0.9)";
             } else if (str.indexOf("ÉXITO") !== -1 || str.indexOf("Success") !== -1) {
-                 btnHen.innerHTML = "¡ÉXITO! CERRANDO EL NAVEGADOR...";
+                 // CAMBIO: Instrucción clara de reiniciar
+                 btnHen.innerHTML = "¡ÉXITO! REINICIE DESDE EL MENÚ XMB";
                  btnHen.style.borderColor = "green";
                  btnHen.style.color = "green";
                  btnHen.style.background = "#000";
@@ -259,8 +260,8 @@
           showResult("Verificación falló. Reintentando método 2...");
           initROP2(true);
         } else {
-          showResult("¡ÉXITO! HEN Activado. Cerrando navegador...");
-          setTimeout(function(){ window.close(); }, 3000);
+          // CAMBIO: Quitamos el setTimeout y window.close()
+          showResult("¡ÉXITO! HEN Activado. Por favor, reinicie la consola desde el menú XMB.");
         }
       }
 
@@ -380,4 +381,5 @@
 </body>
 
 </html>
+
 
