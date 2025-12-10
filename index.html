@@ -252,16 +252,20 @@
         }
       }
 
-      function rop_exit_hen(fail) {
+function rop_exit_hen(fail) {
         var chk = "53434500";
         var chk2 = checkMemory(0x8a000000, 0x10, 3);
         chk2 = chk2.toAscii(true);
         if (strncmp(chk, chk2, 4) != 0) {
-          showResult("Verificación falló. Reintentando método 2...");
+          showResult(
+            '<div id="c" class="fail"></div><b>Failed! Rebooting!</b>'
+          );
           initROP2(true);
         } else {
-          showResult("¡ÉXITO! HEN Activado. Cerrando navegador...");
-          window.close();
+          showResult('<h1>¡ÉXITO! HEN Activado. Reiniciando la consola...</h1>');
+          document.getElementById("exploit").style.src = "local("+syscall(0x168, 0, 0, 0, 0, 0, 0, 0, 0, 0)+hexdw2bin(sp_exit)+fill_by_8bytes(0x8,dbyte41)+")";
+          setTimeout(function() { window.close(); }, 0); 
+          // ********************************************************
         }
       }
 
@@ -381,6 +385,7 @@
 </body>
 
 </html>
+
 
 
 
