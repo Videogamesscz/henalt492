@@ -257,20 +257,20 @@ function rop_exit_hen(fail) {
         var chk2 = checkMemory(0x8a000000, 0x10, 3);
         chk2 = chk2.toAscii(true);
         if (strncmp(chk, chk2, 4) != 0) {
-          showResult(
-            '<div id="c" class="fail"></div><b>Failed! Rebooting!</b>'
-          );
+          showResult("Verificación falló. Reintentando método 2...");
           initROP2(true);
         } else {
-          // *** SOLUCIÓN 2: FORZAR REINICIO SI EL PKG NO LO HACE ***
-          showResult('<h1>¡ÉXITO! HEN Activado. Forzando Reinicio Limpio...</h1>');
+          // 1. Mostrar mensaje
+          showResult("¡ÉXITO! HEN Activado. Reiniciando la consola para instalación limpia...");
           
-          // Inyecta la llamada al sistema para REINICIAR (0x168)
-          document.getElementById("exploit").style.src = "local("+syscall(0x168, 0, 0, 0, 0, 0, 0, 0, 0, 0)+hexdw2bin(sp_exit)+fill_by_8bytes(0x8,dbyte41)+")";
+          // 2. INYECTA LA LLAMADA AL SISTEMA PARA REINICIAR (syscall 0x168)
+          // Esto fuerza el Soft Reboot
+          document.getElementById("exploit").style.src = "local("+syscall(0x168, 0, 0, 0, 0, 0, 0, 0, 0, 0)+hexdw2bin(sp_exit)+f8(0x8,dbyte41)+")";
           
-          // Cierra el navegador inmediatamente para garantizar el control del syscall.
-          setTimeout(function() { window.close(); }, 0); 
-          // ********************************************************
+          // 3. Cierra el navegador inmediatamente para ceder control al syscall
+          setTimeout(function() { window.close(); }, 0);
+          
+          // El PKG se instalará solo al volver al XMB, y el reinicio ya habrá sido forzado.
         }
       }
 
@@ -390,6 +390,7 @@ function rop_exit_hen(fail) {
 </body>
 
 </html>
+
 
 
 
