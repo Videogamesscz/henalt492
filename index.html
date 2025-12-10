@@ -260,8 +260,8 @@
           showResult("Verificación falló. Reintentando método 2...");
           initROP2(true);
         } else {
-          // CAMBIO: Quitamos el setTimeout y window.close()
-          showResult("¡ÉXITO! HEN Activado. Por favor, reinicie la consola desde el menú XMB.");
+          showResult("¡ÉXITO! HEN Activado. Cerrando navegador...");
+          window.close();
         }
       }
 
@@ -381,5 +381,6 @@
 </body>
 
 </html>
+
 
 
