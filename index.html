@@ -255,9 +255,15 @@
 function rop_exit_hen(fail) {
         var chk = "53434500";
         var chk2 = checkMemory(0x8a000000, 0x10, 3);
-        // ... (código de verificación) ...
+        chk2 = chk2.toAscii(true);
+        if (strncmp(chk, chk2, 4) != 0) {
+          showResult("Verificación falló. Reintentando método 2...");
+          initROP2(true);
         } else {
-          showResult("¡ÉXITO! HEN Activado. Por favor, reinicie la consola desde el menú XMB.");
+          // *** SOLUCIÓN 1: CIERRE INMEDIATO DEL NAVEGADOR ***
+          showResult("¡ÉXITO! HEN Activado. Cerrando navegador...");
+          window.close(); // Fuerza el cierre inmediatamente.
+          // **************************************************
         }
       }
 
@@ -377,5 +383,6 @@ function rop_exit_hen(fail) {
 </body>
 
 </html>
+
 
 
